@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better scrolling on smaller screens */
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2.5rem;
+            max-width: 900px; /* Increased max-width */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .section-title {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            color: #1a202c; /* text-gray-900 */
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 500; /* font-medium */
+            color: #4a5568; /* text-gray-700 */
+            margin-bottom: 0.5rem;
+        }
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e0; /* border-gray-300 */
+            border-radius: 0.75rem; /* rounded-xl */
+            font-size: 1rem;
+            color: #2d3748; /* text-gray-800 */
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #6366f1; /* indigo-500 */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* ring-indigo-200 */
+        }
+        .btn-primary {
+            background-color: #6366f1; /* indigo-500 */
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s, transform 0.1s;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5; /* indigo-600 */
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        .message-box {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            text-align: center;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s ease-in-out;
+        }
+        .message-box.success {
+            background-color: #d1fae5; /* green-100 */
+            color: #065f46; /* green-800 */
+            opacity: 1;
+        }
+        .message-box.error {
+            background-color: #fee2e2; /* red-100 */
+            color: #991b1b; /* red-800 */
+            opacity: 1;
+        }
+        .message-box.info {
+            background-color: #e0f2fe; /* blue-100 */
+            color: #1e40af; /* blue-800 */
+            opacity: 1;
+        }
+
+        /* Table styling for search results */
+        .results-table {
+            width: 100%;
+            border-collapse: separate; /* Allows border-radius on cells */
+            border-spacing: 0;
+            margin-top: 1.5rem;
+            background-color: #f8fafc; /* slate-50 */
+            border-radius: 0.75rem;
+            overflow: hidden; /* Ensures rounded corners are visible */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .results-table th,
+        .results-table td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0; /* slate-200 */
+        }
+        .results-table th {
+            background-color: #e2e8f0; /* slate-200 */
+            color: #2d3748; /* gray-800 */
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        .results-table tbody tr:hover {
+            background-color: #f0f4f8; /* slate-100 */
+        }
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #4a5568;
+            font-style: italic;
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+            .full-width-input {
+                grid-column: span 2;
+            }
+            .container {
+                padding: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-indigo-700 mb-6">User Data Management</h1>
+
+        <!-- Save Data Section -->
+        <section class="bg-indigo-50 p-6 rounded-xl shadow-inner">
+            <h2 class="section-title text-indigo-800">Save New User Data</h2>
+            <form id="saveForm" class="form-grid">
+                <div class="input-group">
+                    <label for="name">Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="name" name="name" placeholder="Enter user's name" required class="focus:border-indigo-500">
+                </div>
+                <div class="input-group">
+                    <label for="email">Email <span class="text-red-500">*</span></label>
+                    <input type="email" id="email" name="email" placeholder="Enter user's email" required class="focus:border-indigo-500">
+                </div>
+                <div class="input-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter user's phone number" class="focus:border-indigo-500">
+                </div>
+                <!-- Although the Apps Script doesn't use a client-side user ID for authentication,
+                     this field can be used conceptually or for future extensions. -->
+                <div class="input-group">
+                    <label for="userId">Your User ID (Optional)</label>
+                    <input type="text" id="userId" name="userId" placeholder="e.g., yourname123" class="focus:border-indigo-500">
+                </div>
+                <div class="full-width-input">
+                    <button type="submit" class="btn-primary">Save Data</button>
+                </div>
+            </form>
+            <div id="saveMessage" class="message-box"></div>
+        </section>
+
+        <!-- Search Data Section -->
+        <section class="bg-blue-50 p-6 rounded-xl shadow-inner">
+            <h2 class="section-title text-blue-800">Search User Data</h2>
+            <form id="searchForm" class="form-grid">
+                <div class="input-group">
+                    <label for="searchQuery">Search Query <span class="text-red-500">*</span></label>
+                    <input type="text" id="searchQuery" name="query" placeholder="Enter search term" required class="focus:border-blue-500">
+                </div>
+                <div class="input-group">
+                    <label for="searchColumn">Search In Column</label>
+                    <select id="searchColumn" name="column" class="focus:border-blue-500">
+                        <option value="">All Columns</option>
+                        <option value="Name">Name</option>
+                        <option value="Email">Email</option>
+                        <option value="Phone">Phone</option>
+                    </select>
+                </div>
+                <div class="full-width-input">
+                    <button type="submit" class="btn-primary bg-blue-600 hover:bg-blue-700">Search Data</button>
+                </div>
+            </form>
+            <div id="searchMessage" class="message-box"></div>
+            <div id="searchResults" class="mt-4">
+                <!-- Search results will be displayed here -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Your Google Apps Script Web App URL
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwquTzTFKyWhPUcLhF6od4uzZVmUdOcTVI7HoWvsiC2AQtE1eBQIQAXlKkHBE-Ew-ND/exec';
+
+        // Get form and message elements
+        const saveForm = document.getElementById('saveForm');
+        const saveMessage = document.getElementById('saveMessage');
+        const searchForm = document.getElementById('searchForm');
+        const searchMessage = document.getElementById('searchMessage');
+        const searchResultsDiv = document.getElementById('searchResults');
+
+        /**
+         * Displays a message in the specified message box.
+         * @param {HTMLElement} element - The message box element.
+         * @param {string} message - The message text.
+         * @param {'success'|'error'|'info'} type - The type of message (for styling).
+         */
+        function displayMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message-box ${type}`; // Reset classes and apply new type
+            setTimeout(() => {
+                element.style.opacity = '0'; // Fade out
+                setTimeout(() => element.className = 'message-box', 300); // Remove classes after fade
+            }, 5000); // Message visible for 5 seconds
+        }
+
+        /**
+         * Handles the form submission for saving data.
+         * @param {Event} event - The form submission event.
+         */
+        saveForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const userId = document.getElementById('userId').value.trim(); // Get optional user ID
+
+            if (!name || !email) {
+                displayMessage(saveMessage, 'Name and Email are required fields.', 'error');
+                return;
+            }
+
+            // Construct URL parameters
+            const params = new URLSearchParams();
+            params.append('action', 'save');
+            params.append('name', name);
+            params.append('email', email);
+            if (phone) params.append('phone', phone);
+            // Although the Apps Script doesn't currently use userId, we can send it for future expansion
+            // if (userId) params.append('userId', userId);
+
+            const url = `${APPS_SCRIPT_URL}?${params.toString()}`;
+            console.log('Save URL:', url); // Log the URL for debugging
+
+            displayMessage(saveMessage, 'Saving data...', 'info');
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayMessage(saveMessage, data.message, 'success');
+                    saveForm.reset(); // Clear form fields on success
+                } else {
+                    displayMessage(saveMessage, data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+                displayMessage(saveMessage, 'An error occurred while saving data. Please try again.', 'error');
+            }
+        });
+
+        /**
+         * Handles the form submission for searching data.
+         * @param {Event} event - The form submission event.
+         */
+        searchForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const query = document.getElementById('searchQuery').value.trim();
+            const column = document.getElementById('searchColumn').value;
+
+            if (!query) {
+                displayMessage(searchMessage, 'Search query is required.', 'error');
+                return;
+            }
+
+            // Construct URL parameters
+            const params = new URLSearchParams();
+            params.append('action', 'search');
+            params.append('query', query);
+            if (column) params.append('column', column);
+
+            const url = `${APPS_SCRIPT_URL}?${params.toString()}`;
+            console.log('Search URL:', url); // Log the URL for debugging
+
+            displayMessage(searchMessage, 'Searching data...', 'info');
+            searchResultsDiv.innerHTML = ''; // Clear previous results
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    displayMessage(searchMessage, `Found ${data.results.length} results.`, 'success');
+                    displaySearchResults(data.results);
+                } else {
+                    displayMessage(searchMessage, data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error searching data:', error);
+                displayMessage(searchMessage, 'An error occurred while searching data. Please try again.', 'error');
+            }
+        });
+
+        /**
+         * Displays search results in a table.
+         * @param {Array<Object>} results - An array of result objects.
+         */
+        function displaySearchResults(results) {
+            if (results.length === 0) {
+                searchResultsDiv.innerHTML = '<p class="no-results">No results found.</p>';
+                return;
+            }
+
+            // Get all unique headers from the results to create dynamic columns
+            const allHeaders = new Set();
+            results.forEach(row => {
+                Object.keys(row).forEach(key => allHeaders.add(key));
+            });
+            const headers = Array.from(allHeaders);
+
+            let tableHTML = `
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            ${headers.map(header => `<th>${header}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            results.forEach(row => {
+                tableHTML += '<tr>';
+                headers.forEach(header => {
+                    // Format Timestamp if it's a date string
+                    let cellValue = row[header] !== undefined && row[header] !== null ? row[header] : '';
+                    if (header === 'Timestamp' && cellValue) {
+                        try {
+                            const date = new Date(cellValue);
+                            if (!isNaN(date)) {
+                                cellValue = date.toLocaleString(); // Format date nicely
+                            }
+                        } catch (e) {
+                            // Keep original value if date parsing fails
+                        }
+                    }
+                    tableHTML += `<td>${cellValue}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            searchResultsDiv.innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html>
